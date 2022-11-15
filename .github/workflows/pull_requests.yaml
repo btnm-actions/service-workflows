@@ -33,5 +33,5 @@ jobs:
         with:
           scan-type: 'fs'
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+          severity: 'CRITICAL,HIGH'
           exit-code: '1'
