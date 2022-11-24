@@ -88,7 +88,7 @@ jobs:
         uses: btnm-actions/service-sync-deploy@v0.1.1
         with:
           argocd-server: ${{ inputs.argocd-server }}
-          argocd-auth-token: ${{ secrets.ARGOCD_DEV_TOKEN }}
+          argocd-auth-token: ${{ secrets.ARGOCD_TOKEN }}
           argocd-app: staging-${{ inputs.service }}
           cf-access-client-id: ${{ secrets.CF_ACCESS_CLIENT_ID }}
           cf-access-client-secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}   
