@@ -15,9 +15,11 @@ on:
         type: string
       image-version:
         required: true
+        type: string
       commit-message:
         required: false
         default: ''
+        type: string
     secrets:
       GH_ACTIONS_TOKEN:
         required: true
