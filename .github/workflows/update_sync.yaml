@@ -33,7 +33,7 @@ on:
         required: true
 jobs:
   update-dev:
-    if: ${{ github.ref_name == 'ci/dev-workflow' }} 
+    if: ${{ github.ref_type	== 'tag' }}
     name: Update Dev
     runs-on: ubuntu-22.04
     steps:
@@ -63,7 +63,7 @@ jobs:
           cf-access-client-secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
   update-staging:
-    if: ${{ github.ref_type	== 'tag' }} 
+    if: ${{ github.ref_name == 'ci/dev-workflow' }} 
     name: Update Staging
     runs-on: ubuntu-22.04
     steps:
