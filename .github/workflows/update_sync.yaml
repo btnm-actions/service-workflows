@@ -29,8 +29,6 @@ on:
         required: true
       ARGOCD_DEV_TOKEN:
         required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
 jobs:
   update-dev:
     if: ${{ github.ref_name == 'ci/dev-workflow' }} 
