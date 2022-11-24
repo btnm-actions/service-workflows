@@ -1,0 +1,94 @@
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      argocd-server:
+        required: true
+        type: string
+      argocd-dev-server:
+        required: true
+        type: string
+      deployments-repository:
+        required: true
+        type: string
+      image-version:
+        required: true
+      commit-message:
+        required: false
+        default: ''
+    secrets:
+      GH_ACTIONS_TOKEN:
+        required: true
+      CF_ACCESS_CLIENT_ID:
+        required: true
+      CF_ACCESS_CLIENT_SECRET:
+        required: true
+      ARGOCD_TOKEN:
+        required: true
+      ARGOCD_DEV_TOKEN:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  update-dev:
+    if: ${{ github.ref_name == 'ci/dev-workflow' }} 
+    name: Update Dev
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Update image to deploy
+        uses: btnm-actions/service-image-update@v0.1.8
+        with:
+          service: ${{ inputs.service }}
+          gh-token: ${{ secrets.GH_ACTIONS_TOKEN }}
+          deployments-repository: ${{ inputs.deployments-repository }}
+          target-path: ${{ inputs.service }}/dev/values-version.yaml
+          yq-image-path: .${{ inputs.service }}.image.tag
+          image-version: ${{ inputs.image-version }}
+          commit-message: ${{ inputs.commit-message }}
+  sync-dev:
+    name: Sync Dev
+    runs-on: ubuntu-22.04
+    needs: update-dev
+    environment: dev
+    steps:
+      - name: Sync
+        uses: btnm-actions/service-sync-deploy@v0.1.1
+        with:
+          argocd-server: ${{ inputs.argocd-dev-server }}
+          argocd-auth-token: ${{ secrets.ARGOCD_DEV_TOKEN }}
+          argocd-app: dev-${{ inputs.service }}
+          cf-access-client-id: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          cf-access-client-secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+
+  update-staging:
+    if: ${{ github.ref_type	== 'tag' }} 
+    name: Update Staging
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Update image to deploy
+        uses: btnm-actions/service-image-update@v0.1.8
+        with:
+          service: ${{ inputs.service }}
+          gh-token: ${{ secrets.GH_ACTIONS_TOKEN }}
+          deployments-repository: ${{ inputs.deployments-repository }}
+          target-path: ${{ inputs.service }}/staging/values-version.yaml
+          yq-image-path: .${{ inputs.service }}.image.tag
+          image-version: ${{ inputs.image-version }}
+          commit-message: ${{ inputs.commit-message }}
+
+  sync-staging:
+    name: Sync Staging
+    runs-on: ubuntu-22.04
+    needs: update-staging
+    environment: staging
+    steps:
+      - name: Sync
+        uses: btnm-actions/service-sync-deploy@v0.1.1
+        with:
+          argocd-server: ${{ inputs.argocd-server }}
+          argocd-auth-token: ${{ secrets.ARGOCD_DEV_TOKEN }}
+          argocd-app: staging-${{ inputs.service }}
+          cf-access-client-id: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          cf-access-client-secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}   
